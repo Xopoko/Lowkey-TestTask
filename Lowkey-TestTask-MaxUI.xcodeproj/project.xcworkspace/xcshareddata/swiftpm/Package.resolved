@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "maxui",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/Xopoko/MaxUI.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "d6f905756eb4fbf088a9a7b281608972723f89db"
+      }
+    }
+  ],
+  "version" : 2
+}
