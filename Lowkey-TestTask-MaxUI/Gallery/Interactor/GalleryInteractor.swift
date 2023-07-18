@@ -8,10 +8,12 @@
 import Foundation
 
 protocol GalleryInteractorProtocol: AnyObject {
+    var initialURL: URL { get }
     func loadList(by url: URL, completion: @escaping (PexelsResponse) -> Void)
 }
 
 final class GalleryInteractor: GalleryInteractorProtocol {
+    let initialURL = URL(string: "https://api.pexels.com/v1/curated?page=1&per_page=20")!
     
     // MARK: GalleryInteractorProtocol
     func loadList(by url: URL, completion: @escaping (PexelsResponse) -> Void) {

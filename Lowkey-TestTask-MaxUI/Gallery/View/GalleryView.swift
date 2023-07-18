@@ -7,6 +7,7 @@
 
 import UIKit
 import MaxUI
+import Combine
 
 extension GalleryView {
     struct Model {
@@ -14,10 +15,22 @@ extension GalleryView {
         var photos: [Photo]
         var didSelectPhoto: (Photo) -> Void
         var loadMore: () -> Void
+        var refreshHandler: () -> Void
     }
 }
 
 final class GalleryView: UIView {
+    private var refreshHandler: (() -> Void)?
+    private var cancellables = Set<AnyCancellable>()
+    
+    private lazy var refreshControl: UIRefreshControl = {
+        let control = UIRefreshControl()
+        control.addTarget(self, action: #selector(refresh), for: .valueChanged)
+        control.backgroundColor = .mainBackgroundColor
+
+        return control
+    }()
+    
     func configure(with model: Model) {
         MCollection(
             model.$photos.map { photos in
@@ -40,8 +53,24 @@ final class GalleryView: UIView {
                 }
             }
         )
+        .refreshControl(refreshControl)
         .trackDataConsumed(treshold: 2) { model.loadMore() }
         .configure(in: self)
+        
+        refreshHandler = model.refreshHandler
+        
+        model.$photos.publisher.sink { [weak self] _ in
+            if self?.refreshControl.isRefreshing == true {
+                self?.refreshControl.endRefreshing()
+            }
+        }
+        .store(in: &cancellables)
+        
+    }
+    
+    @objc
+    private func refresh() {
+        refreshHandler?()
     }
 }
 
@@ -56,7 +85,8 @@ struct Gallery_Previews: PreviewProvider {
                     with: GalleryView.Model(
                         photos: Array(repeating: mockPhoto, count: 20),
                         didSelectPhoto: { print($0) },
-                        loadMore: {}
+                        loadMore: {},
+                        refreshHandler: {}
                     )
                 )
                 return view

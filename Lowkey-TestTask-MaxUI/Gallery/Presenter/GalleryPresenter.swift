@@ -20,13 +20,15 @@ final class GalleryPresenter: GalleryPresenterProtocol {
     private let router: GalleryRouterProtocol
     private let interactor: GalleryInteractorProtocol
     
-    private var nextPageUrl = URL(string: "https://api.pexels.com/v1/curated?page=1&per_page=20")
+    private var nextPageUrl: URL?
     private var isLoading = false
     
     private lazy var model = GalleryView.Model(photos: []) { [weak self] photo in
         self?.handleDidSelectPhoto(photo)
     } loadMore: { [weak self] in
         self?.handleLoadMore()
+    } refreshHandler: { [weak self] in
+        self?.handleRefresh()
     }
     
     // MARK: Init
@@ -42,24 +44,29 @@ final class GalleryPresenter: GalleryPresenterProtocol {
     func didLoadView() {
         controller?.updateData(with: model)
         
-        loadNextPage()
+        loadPage(initial: true)
     }
 }
 
 // MARK: - Private methods
 extension GalleryPresenter {
-    private func loadNextPage() {
+    private func loadPage(initial: Bool) {
         guard !isLoading else {
-            print("Is something already loading")
+            print("Is something already in loading")
             return
         }
-        guard let nextPageUrl else {
+        let url = initial ? interactor.initialURL : nextPageUrl
+        guard let url else {
             print("The nextPageUrl is nil or this is the last page")
             return
         }
         isLoading = true
-        interactor.loadList(by: nextPageUrl) { [weak self] pexelResponse in
-            self?.model.photos.append(contentsOf: pexelResponse.photos)
+        interactor.loadList(by: url) { [weak self] pexelResponse in
+            if initial {
+                self?.model.photos = pexelResponse.photos
+            } else {
+                self?.model.photos.append(contentsOf: pexelResponse.photos)
+            }
             self?.nextPageUrl = URL(string: pexelResponse.nextPageUrl)
             self?.isLoading = false
         }
@@ -70,6 +77,10 @@ extension GalleryPresenter {
     }
     
     private func handleLoadMore() {
-        loadNextPage()
+        loadPage(initial: false)
+    }
+    
+    private func handleRefresh() {
+        loadPage(initial: true)
     }
 }
