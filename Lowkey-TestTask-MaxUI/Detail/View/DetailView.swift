@@ -74,14 +74,12 @@ import SwiftUI
 struct Detail_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(previewDevices, id: \.self) { device in
-            NavigationStack {
-                UIViewPreview {
-                    let view = DetailView()
-                    view.configure(with: DetailView.Model(photo: mockPhoto, didTapOnNickname: {}))
-                    return view
-                }
-                .previewDevice(device)
+            UIViewPreview {
+                let view = DetailView()
+                view.configure(with: DetailView.Model(photo: mockPhoto, didTapOnNickname: {}))
+                return view
             }
+            .previewDevice(device)
         }
     }
 }

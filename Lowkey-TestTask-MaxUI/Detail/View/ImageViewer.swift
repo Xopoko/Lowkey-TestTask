@@ -80,14 +80,12 @@ import SwiftUI
 struct ImageViewer_Previews: PreviewProvider {
     static var previews: some View {
         ForEach(previewDevices, id: \.self) { device in
-            NavigationStack {
-                UIViewPreview {
-                    let imageViewer = ImageViewer()
-                    imageViewer.imageView.image = UIImage(named: "mockImage")
-                    return imageViewer
-                }
-                .previewDevice(device)
+            UIViewPreview {
+                let imageViewer = ImageViewer()
+                imageViewer.imageView.image = UIImage(named: "mockImage")
+                return imageViewer
             }
+            .previewDevice(device)
         }
     }
 }
